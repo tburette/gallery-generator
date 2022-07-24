@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+// Can have a # for shebang in js files : 
+// https://github.com/tc39/proposal-hashbang
 import {readdir, mkdir, open} from 'fs/promises';
 import util from 'util';
 const exec = util.promisify((await import('child_process')).exec);
