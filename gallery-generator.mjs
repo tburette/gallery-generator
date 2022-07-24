@@ -36,7 +36,7 @@ async function generateGalleryForDirectory(inputGalleryName, indexFile, outputDi
         // then space out the remaining ones
         for(let i = 0;i<PREVIEW_COUNT-1;i++) {
             // take from the second image in the files to the last
-            let index_to_take = 1 + Math.floor((dirContent.length-1)/(PREVIEW_COUNT-1)*i);
+            let index_to_take = Math.floor((dirContent.length-1)/(PREVIEW_COUNT-1)*(i+1));
             filesSelectedForPreview.push(dirContent[index_to_take]);
         }
     }
