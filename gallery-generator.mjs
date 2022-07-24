@@ -14,7 +14,7 @@ function isVideo(filename) {
     return videoExtensions.has(filename.split('.').at(-1));
 }
 
-async function createDirectoryGallery(indexFile, directory) {
+async function generateGalleryForDirectory(indexFile, directory) {
     // would be nice to sort lexicographically
     let dirContent = await readdir(path + '/' + directory);
     indexFile.write(`${directory} (${dirContent.length}) <br>`);
@@ -40,7 +40,6 @@ async function createDirectoryGallery(indexFile, directory) {
 }
 
 async function getDirectories(path) {
-    console.log(path);
     let directories = (await readdir(path, {withFileTypes: true}))
     .filter(dirent=>dirent.isDirectory())
     .map(dirent=>dirent.name);
@@ -83,7 +82,7 @@ indexFile.write(`<h1>${path.split('/').at(-1)} Gallery</h1>\n`);
 
 for(let directory of directories) {
     if(directory == OUTPUT_DIRECTORY_NAME) continue;
-    await createDirectoryGallery(indexFile, directory);
+    await generateGalleryForDirectory(indexFile, directory);
 }
 
 indexFile.close();
