@@ -17,8 +17,10 @@ function isVideo(filename) {
 }
 
 async function generateGalleryForDirectory(inputGalleryName, indexFile, outputDirectory) {
-    let dirContent = await readdir(path + '/' + inputGalleryName);
-    // todo : filter out non image/videos (and directories)
+    let dirContent = (await readdir(path + '/' + inputGalleryName, {withFileTypes: true}))
+        .filter(dirent=>dirent.isFile())
+        .map(dirent=>dirent.name)
+        .filter(name =>isImage(name) || isVideo(name));
     dirContent.sort((a, b)=>a.localeCompare(b, 'en', {numeric: true}));
     indexFile.write(`${inputGalleryName} (${dirContent.length}) <br>`);
     const PREVIEW_COUNT = 4;
@@ -52,6 +54,7 @@ async function generateGalleryForDirectory(inputGalleryName, indexFile, outputDi
         } else if(isVideo(previewFilename)) {
             await exec(`ffmpeg -nostdin -y -ss 4 -i '${fullpreviewFilePath}' -vf scale=w=120:h=120:force_original_aspect_ratio=decrease -frames:v 1 '${fullthumbnailFilePath}'`);
         } else {
+            // TODO silently ignore or log instead?
             throw new Error(`Asked to create preview for file which is neither an image nor a video: ${previewFilename}`);
         }
         indexFile.write(`<img src="${fullthumbnailFilePath}"></img>`)
