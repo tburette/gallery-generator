@@ -25,7 +25,7 @@ async function generateGalleryForDirectory(inputGalleryName, indexFile, outputDi
         .map(dirent=>dirent.name)
         .filter(name =>isImage(name) || isVideo(name));
     dirContent.sort((a, b)=>a.localeCompare(b, 'en', {numeric: true}));
-    indexFile.write(`${inputGalleryName} (${dirContent.length}) <br>`);
+    await indexFile.write(`${inputGalleryName} (${dirContent.length}) <br>`);
     const PREVIEW_COUNT = 4;
     let filesSelectedForPreview;
     if(dirContent.length <= PREVIEW_COUNT) {
@@ -60,9 +60,9 @@ async function generateGalleryForDirectory(inputGalleryName, indexFile, outputDi
             // TODO silently ignore or log instead?
             throw new Error(`Asked to create preview for file which is neither an image nor a video: ${previewFilename}`);
         }
-        indexFile.write(`<img src="${fullthumbnailFilePath}"></img>`)
+        await indexFile.write(`<img src="${fullthumbnailFilePath}"></img>`)
     }
-    indexFile.write('<br><br>');
+    await indexFile.write('<br><br>');
 }
 
 async function getDirectories(path) {
@@ -105,7 +105,7 @@ try{
     process.exit(1);
 }
 
-indexFile.write(`<h1>${path.split('/').at(-1)} Gallery</h1>\n`);
+await indexFile.write(`<h1>${path.split('/').at(-1)} Gallery</h1>\n`);
 
 for(let inputGalleryName of directories) {
     if(inputGalleryName == OUTPUT_DIRECTORY_NAME) continue;
