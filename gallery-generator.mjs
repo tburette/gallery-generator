@@ -51,7 +51,10 @@ async function generateGalleryForDirectory(inputGalleryName, indexFile, outputDi
 
     for(var previewFilename of filesSelectedForPreview) {
         let fullpreviewFilePath = path + '/' + inputGalleryName + '/' + previewFilename;
+        // to be used for IO operations
         let fullthumbnailFilePath = outputDirectory + '/' + inputGalleryName + '/' + 'thumb_' + previewFilename + '.jpg';
+        // to be used in HTML
+        let thumbnailFilePathRelativeToOutputDirectory = inputGalleryName + '/' + 'thumb_' + previewFilename + '.jpg'
         if(isImage(previewFilename)) {
             await exec(`convert '${fullpreviewFilePath}' -resize 100x100 '${fullthumbnailFilePath}'`);
         } else if(isVideo(previewFilename)) {
@@ -60,7 +63,8 @@ async function generateGalleryForDirectory(inputGalleryName, indexFile, outputDi
             // TODO silently ignore or log instead?
             throw new Error(`Asked to create preview for file which is neither an image nor a video: ${previewFilename}`);
         }
-        await indexFile.write(`<img src="${fullthumbnailFilePath}"></img>`)
+        // BUG does not work if path given is relative. Must remove 'path + outoutDirectory' from fullthumbnailFilePath
+        await indexFile.write(`<img src="${thumbnailFilePathRelativeToOutputDirectory}"></img>`)
     }
     await indexFile.write('<br><br>');
 }
