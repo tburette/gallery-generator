@@ -15,8 +15,8 @@ function isVideo(filename) {
 }
 
 async function generateGalleryForDirectory(indexFile, directory) {
-    // would be nice to sort lexicographically
     let dirContent = await readdir(path + '/' + directory);
+    dirContent.sort((a, b)=>a.localeCompare(b, 'en', {numeric: true}));
     indexFile.write(`${directory} (${dirContent.length}) <br>`);
     const PREVIEW_COUNT = 4;
     let previewFiles;
