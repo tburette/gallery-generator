@@ -9,6 +9,8 @@ Give the path to a directory itself containing directories made of
 medias (images/videos). It generates a web page allowing to browse and watch
 the medias in all those directories from within a browser.
 
+External dependencies : convert (imagemagick) a and ffmpeg.
+
 Tested on linux. May no work on windows due to difference in path separator
 (\ for windows, / for linux/URLs).
 */
