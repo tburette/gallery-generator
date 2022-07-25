@@ -1,25 +1,16 @@
 /*
 Generates the main index web page containing a preview of the subdirectories.
 */
+import {basename} from 'path';
 import {readdir, mkdir} from 'fs/promises';
-import util from 'util';
-const exec = util.promisify((await import('child_process')).exec);
+import {isImage, isVideo} from './utils.mjs';
+import {generateThumbnail} from './thumbnail.mjs';
 
 export {writeHeader, generateGalleryForDirectory}
 
-const imageExtensions = new Set(['png', 'jpg', 'jpeg', 'bmp', 'gif']);
-function isImage(filename) {
-    return imageExtensions.has(filename.split('.').at(-1));
-}
-
-const videoExtensions = new Set(['webm', 'avi', 'x264', 'mp4', 'mkv']);
-function isVideo(filename) {
-    return videoExtensions.has(filename.split('.').at(-1));
-}
-
 
 async function writeHeader(indexFile, parentDirectoryToProcess) {
-    await indexFile.write(`<h1>${parentDirectoryToProcess.split('/').at(-1)} Gallery</h1>\n`);
+    await indexFile.write(`<h1>${basename(parentDirectoryToProcess)} Gallery</h1>\n`);
 }
 
 async function generateGalleryForDirectory(indexFile, parentDirectoryToProcess, inputGalleryName, outputDirectory) {
@@ -54,20 +45,18 @@ async function generateGalleryForDirectory(indexFile, parentDirectoryToProcess, 
 
     for(var previewFilename of filesSelectedForPreview) {
         let fullpreviewFilePath = parentDirectoryToProcess + '/' + inputGalleryName + '/' + previewFilename;
-        // to be used for IO operations
-        let fullthumbnailFilePath = outputDirectory + '/' + inputGalleryName + '/' + 'thumb_' + previewFilename + '.jpg';
-        // to be used in HTML
-        let thumbnailFilePathRelativeToOutputDirectory = inputGalleryName + '/' + 'thumb_' + previewFilename + '.jpg'
-        if(isImage(previewFilename)) {
-            await exec(`convert '${fullpreviewFilePath}' -resize 100x100 '${fullthumbnailFilePath}'`);
-        } else if(isVideo(previewFilename)) {
-            await exec(`ffmpeg -nostdin -y -ss 4 -i '${fullpreviewFilePath}' -vf scale=w=120:h=120:force_original_aspect_ratio=decrease -frames:v 1 '${fullthumbnailFilePath}'`);
-        } else {
-            // TODO silently ignore or log instead?
-            throw new Error(`Asked to create preview for file which is neither an image nor a video: ${previewFilename}`);
+        let fullThumbnailDirectory = outputDirectory + '/' + inputGalleryName;
+        let thumbnailFilePathRelativeToOutputDirectory;
+        try {
+            thumbnailFilePathRelativeToOutputDirectory = await generateThumbnail(fullpreviewFilePath, fullThumbnailDirectory);
+        } catch (error) {
+            console.error(`Couldn't generate thumbnail for ${fullpreviewFilePath}.`, error.message);
+            // still generate the img in the page even if thumbnail generation
+            // failed (will display a broken image symbol in the browser).
+            thumbnailFilePathRelativeToOutputDirectory = '';
         }
-        // BUG does not work if path given is relative. Must remove 'path + outoutDirectory' from fullthumbnailFilePath
-        await indexFile.write(`<img src="${thumbnailFilePathRelativeToOutputDirectory}"></img>`)
+            await indexFile.write(`<img src="${thumbnailFilePathRelativeToOutputDirectory}"></img>`)
+
     }
     await indexFile.write('<br><br>');
 }
