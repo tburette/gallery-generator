@@ -6,7 +6,7 @@ import {readdir, mkdir} from 'fs/promises';
 import {isImage, isVideo} from './utils.mjs';
 import {generateThumbnail} from './thumbnail.mjs';
 
-export {writeHeader, generateGalleryForDirectory}
+export {writeHeader, generateGalleryForDirectory, writeFooter};
 
 
 async function writeHeader(indexFile, parentDirectoryToProcess) {
@@ -59,4 +59,8 @@ async function generateGalleryForDirectory(indexFile, parentDirectoryToProcess, 
 
     }
     await indexFile.write('<br><br>');
+}
+
+async function writeFooter(indexFile) {
+    await indexFile.write(`<br>Generated at ${new Date().toLocaleString()}\n`);
 }

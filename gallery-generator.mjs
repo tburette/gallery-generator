@@ -70,4 +70,6 @@ for(let inputGalleryName of directories) {
     await indexGenerator.generateGalleryForDirectory(indexFile, parentDirectoryToProcess, inputGalleryName, outputDirectory);
 }
 
+indexGenerator.writeFooter(indexFile);
+
 indexFile.close();
