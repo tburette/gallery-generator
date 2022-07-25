@@ -41,7 +41,7 @@ try {
         process.exit(1);
     }
 }
-console.log("Gallery preview generated in " + outputDirectory);
+console.log("Generating gallery preview in " + outputDirectory);
 
 // index will contain preview of all the directories
 let indexFile;
