@@ -1,11 +1,13 @@
+import {extname} from 'path';
+
 export {isImage, isVideo};
 
-const imageExtensions = new Set(['png', 'jpg', 'jpeg', 'bmp', 'gif']);
+const imageExtensions = new Set(['.png', '.jpg', '.jpeg', '.bmp', '.gif']);
 function isImage(filename) {
-    return imageExtensions.has(filename.split('.').at(-1));
+    return imageExtensions.has(extname(filename));
 }
 
-const videoExtensions = new Set(['webm', 'avi', 'x264', 'mp4', 'mkv']);
+const videoExtensions = new Set(['.webm', '.avi', '.x264', '.mp4', '.mkv']);
 function isVideo(filename) {
-    return videoExtensions.has(filename.split('.').at(-1));
+    return videoExtensions.has(extname(filename));
 }
