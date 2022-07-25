@@ -90,8 +90,8 @@ const outputDirectory = parentDirectoryToProcess + '/' + OUTPUT_DIRECTORY_NAME;
 try {
     await mkdir(outputDirectory)
 }catch(err) {
-    if(err.code != 'EEXIST') {
-        console.error(`Couldn't create the outpout directory (${outputDirectory})`);
+    if(err?.code != 'EEXIST') {
+        console.error(`Couldn't create the output directory (${outputDirectory})`);
         process.exit(1);
     }
 }
