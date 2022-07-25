@@ -59,7 +59,7 @@ async function generatePreviewForOneFile(
         thumbnailFilePathRelativeToOutputDirectory = '';
     }
         await indexFile.write(
-            `<img src="${thumbnailFilePathRelativeToOutputDirectory}"></img>`);
+            `<img src="${thumbnailFilePathRelativeToOutputDirectory}"></img>\n`);
 }
 
 async function generateGalleryForDirectory(
@@ -73,7 +73,7 @@ async function generateGalleryForDirectory(
     // numeric sort so that '2.jpg' appears before '10.jpg'
     dirContent.sort((a, b)=>a.localeCompare(b, 'en', {numeric: true}));
     
-    await indexFile.write(`${inputGalleryName} (${dirContent.length}) <br>`);
+    await indexFile.write(`${inputGalleryName} (${dirContent.length}) <br>\n`);
     
     let filesSelectedForPreview = selectPreviewFiles(dirContent);
 
@@ -98,9 +98,9 @@ async function generateGalleryForDirectory(
             previewFilePath,
             thumbnailDestinationDirectory);
     }
-    await indexFile.write('<br><br>');
+    await indexFile.write('<br><br>\n');
 }
 
 async function writeFooter(indexFile) {
-    await indexFile.write(`<br>Generated at ${new Date().toLocaleString()}\n`);
+    await indexFile.write(`<br>\nGenerated at ${new Date().toLocaleString()}\n`);
 }
