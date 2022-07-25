@@ -25,7 +25,7 @@ async function generateThumbnail(inputFilePath, destinationDirectory) {
         await exec(`ffmpeg -nostdin -y -ss 4 -i '${inputFilePath}' -vf scale=w=120:h=120:force_original_aspect_ratio=decrease -frames:v 1 '${thumbnailFilePath}'`);
     } else {
         // TODO silently ignore or log instead?
-        throw new Error(`Asked to create preview for file which is neither an image nor a video: ${previewFilename}`);
+        throw new Error(`Asked to create preview for file which is neither an image nor a video: ${inputFilePath}`);
     }
     return thumbnailFilePath;
 }
