@@ -8,6 +8,9 @@ Generate web pages allowing to easily browse directories of images and videos.
 Give the path to a directory itself containing directories made of
 medias (images/videos). It generates a web page allowing to browse and watch
 the medias in all those directories from within a browser.
+
+Tested on linux. May no work on windows due to difference in path separator
+(\ for windows, / for linux/URLs).
 */
 
 import {readdir, mkdir, open} from 'fs/promises';
