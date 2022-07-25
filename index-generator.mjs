@@ -13,8 +13,15 @@ async function writeHeader(indexFile, parentDirectoryToProcess) {
     await indexFile.write(`<h1>${basename(parentDirectoryToProcess)} Gallery</h1>\n`);
 }
 
-async function generateGalleryForDirectory(indexFile, parentDirectoryToProcess, inputGalleryName, outputDirectory) {
-    let dirContent = (await readdir(parentDirectoryToProcess + '/' + inputGalleryName, {withFileTypes: true}))
+async function generateGalleryForDirectory(
+    indexFile, 
+    parentDirectoryToProcess, 
+    inputGalleryName, 
+    outputDirectory) {
+    
+    let dirContent = (await readdir(
+        parentDirectoryToProcess + '/' + inputGalleryName,
+        {withFileTypes: true}))
         .filter(dirent=>dirent.isFile())
         .map(dirent=>dirent.name)
         .filter(name =>isImage(name) || isVideo(name));
@@ -30,7 +37,8 @@ async function generateGalleryForDirectory(indexFile, parentDirectoryToProcess, 
         // then space out the remaining ones
         for(let i = 0;i<PREVIEW_COUNT-1;i++) {
             // take from the second image in the files to the last
-            let index_to_take = Math.floor((dirContent.length-1)/(PREVIEW_COUNT-1)*(i+1));
+            let index_to_take = 
+                Math.floor((dirContent.length-1)/(PREVIEW_COUNT-1)*(i+1));
             filesSelectedForPreview.push(dirContent[index_to_take]);
         }
     }
@@ -44,11 +52,17 @@ async function generateGalleryForDirectory(indexFile, parentDirectoryToProcess, 
     }
 
     for(var previewFilename of filesSelectedForPreview) {
-        let fullpreviewFilePath = parentDirectoryToProcess + '/' + inputGalleryName + '/' + previewFilename;
+        let fullpreviewFilePath = 
+            parentDirectoryToProcess +
+            '/' + inputGalleryName +
+            '/' + previewFilename;
         let fullThumbnailDirectory = outputDirectory + '/' + inputGalleryName;
         let thumbnailFilePathRelativeToOutputDirectory;
         try {
-            thumbnailFilePathRelativeToOutputDirectory = await generateThumbnail(fullpreviewFilePath, fullThumbnailDirectory);
+            thumbnailFilePathRelativeToOutputDirectory = 
+                await generateThumbnail(
+                    fullpreviewFilePath,
+                    fullThumbnailDirectory);
         } catch (error) {
             console.error(`Couldn't generate thumbnail for ${fullpreviewFilePath}.`, error.message);
             // still generate the img in the page even if thumbnail generation

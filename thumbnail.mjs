@@ -10,7 +10,8 @@ const THUMBNAIL_FILE_POSTFIX = '.jpg';
 
 async function generateThumbnail(inputFilePath, destinationDirectory) {
     let inputFileName = basename(inputFilePath);
-    // Can end up with thumbnail names like, '...xx.jpg.jpg'. A bit ugly but simpler to handle.
+    // Can end up with thumbnail names like, '...xx.jpg.jpg'.
+    // A bit ugly but simpler to handle.
     let thumbnailFilePath = 
         destinationDirectory + 
         '/' + 

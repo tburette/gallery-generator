@@ -67,7 +67,11 @@ try{
 
 for(let inputGalleryName of directories) {
     if(inputGalleryName == OUTPUT_DIRECTORY_NAME) continue;
-    await indexGenerator.generateGalleryForDirectory(indexFile, parentDirectoryToProcess, inputGalleryName, outputDirectory);
+    await indexGenerator.generateGalleryForDirectory(
+        indexFile, 
+        parentDirectoryToProcess, 
+        inputGalleryName, 
+        outputDirectory);
 }
 
 indexGenerator.writeFooter(indexFile);
