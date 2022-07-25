@@ -1,6 +1,15 @@
 #!/usr/bin/env node
 // Can have a # for shebang in js files : 
 // https://github.com/tc39/proposal-hashbang
+
+/*
+Generate web pages allowing to easily browse directories of images and videos.
+
+Give the path to a directory itself containing directories made of medias
+(images/videos). It generates a web page allowing to brows and watch the medias
+in all those directories from within a browser.
+*/
+
 import {readdir, mkdir, open} from 'fs/promises';
 import util from 'util';
 const exec = util.promisify((await import('child_process')).exec);
@@ -77,7 +86,7 @@ async function getDirectories(path) {
 }
 
 if(process.argv.length < 3) {
-    console.log("Missing path argument.");
+    console.log("Missing arg : directory containing directories of media.");
     process.exit(1);
 }
 let path = process.argv.at(-1);
@@ -99,13 +108,15 @@ try {
         process.exit(1);
     }
 }
+console.log("Gallery preview generated in " + outputDirectory);
 
 // index
 let indexFile;
 try{
-    indexFile = await open(outputDirectory + '/' + INDEX_FILE_NAME, 'w');
+    let indexPath = outputDirectory + '/' + INDEX_FILE_NAME;
+    indexFile = await open(indexPath, 'w');
 }catch(err) {
-    console.error(`Couldn't create the output directory : ${err}`);
+    console.error(`Couldn't create the gallery preview web page at indexPath. ${err}`);
     process.exit(1);
 }
 
