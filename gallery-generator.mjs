@@ -11,6 +11,7 @@ the medias in all those directories from within a browser.
 */
 
 import {readdir, mkdir, open} from 'fs/promises';
+import {resolve} from 'path';
 import * as indexGenerator from './index-generator.mjs';
 
 const OUTPUT_DIRECTORY_NAME = "generatedGallery";
@@ -22,6 +23,9 @@ if(process.argv.length < 3) {
     process.exit(1);
 }
 let parentDirectoryToProcess = process.argv.at(-1);
+// Need absolute path so that name of the parent directory is available
+// (wouldn't be the case with a path such as '.').
+parentDirectoryToProcess = resolve(parentDirectoryToProcess);
 
 const outputDirectory = parentDirectoryToProcess + '/' + OUTPUT_DIRECTORY_NAME;
 try {
