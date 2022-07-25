@@ -18,7 +18,8 @@ async function generateThumbnail(inputFilePath, destinationDirectory) {
         inputFileName + 
         THUMBNAIL_FILE_POSTFIX;
     if(isImage(inputFileName)) {
-        await exec(`convert '${inputFilePath}' -resize 100x100 '${thumbnailFilePath}'`);
+        // [0] to convert only the first frame of gifs
+        await exec(`convert '${inputFilePath}[0]' -resize 100x100 '${thumbnailFilePath}'`);
     } else if(isVideo(inputFileName)) {
         await exec(`ffmpeg -nostdin -y -ss 4 -i '${inputFilePath}' -vf scale=w=120:h=120:force_original_aspect_ratio=decrease -frames:v 1 '${thumbnailFilePath}'`);
     } else {
