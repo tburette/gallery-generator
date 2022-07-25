@@ -5,9 +5,9 @@
 /*
 Generate web pages allowing to easily browse directories of images and videos.
 
-Give the path to a directory itself containing directories made of medias
-(images/videos). It generates a web page allowing to brows and watch the medias
-in all those directories from within a browser.
+Give the path to a directory itself containing directories made of
+medias (images/videos). It generates a web page allowing to browse and watch
+the medias in all those directories from within a browser.
 */
 
 import {readdir, mkdir, open} from 'fs/promises';
