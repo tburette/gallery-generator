@@ -8,9 +8,58 @@ import {generateThumbnail} from './thumbnail.mjs';
 
 export {writeHeader, generateGalleryForDirectory, writeFooter};
 
+const PREVIEW_FILES_COUNT = 4;
 
 async function writeHeader(indexFile, parentDirectoryToProcess) {
-    await indexFile.write(`<h1>${basename(parentDirectoryToProcess)} Gallery</h1>\n`);
+    await indexFile.write(
+        `<h1>${basename(parentDirectoryToProcess)} Gallery</h1>\n`);
+}
+
+async function getImagesAndVideoFiles(directory) {
+    return (await readdir(directory, {withFileTypes: true}))
+        .filter(dirent=>dirent.isFile())
+        .map(dirent=>dirent.name)
+        .filter(name =>isImage(name) || isVideo(name));
+}
+
+function selectPreviewFiles(dirContent) {
+    let filesSelectedForPreview;
+    if(dirContent.length <= PREVIEW_FILES_COUNT) {
+        filesSelectedForPreview = dirContent;
+    } else {
+        // always take the first
+        filesSelectedForPreview = dirContent.slice(0, 1);
+        // then space out the remaining ones
+        for(let i = 0;i<PREVIEW_FILES_COUNT-1;i++) {
+            let index_to_take = 
+                Math.floor((dirContent.length-1)/(PREVIEW_FILES_COUNT-1)*(i+1));
+            filesSelectedForPreview.push(dirContent[index_to_take]);
+        }
+    }
+    return filesSelectedForPreview;
+}
+
+async function generatePreviewForOneFile(
+    indexFile,
+    previewFilePath,
+    thumbnailDestinationDirectory) {
+    
+    let thumbnailFilePathRelativeToOutputDirectory;
+    try {
+        thumbnailFilePathRelativeToOutputDirectory = 
+            await generateThumbnail(
+                previewFilePath,
+                thumbnailDestinationDirectory);
+    } catch (error) {
+        console.error(
+            `Couldn't generate thumbnail for ${previewFilePath}.`,
+            error.message);
+        // still generate the img in the page even if thumbnail generation
+        // failed (will display a broken image symbol in the browser).
+        thumbnailFilePathRelativeToOutputDirectory = '';
+    }
+        await indexFile.write(
+            `<img src="${thumbnailFilePathRelativeToOutputDirectory}"></img>`);
 }
 
 async function generateGalleryForDirectory(
@@ -19,29 +68,14 @@ async function generateGalleryForDirectory(
     inputGalleryName, 
     outputDirectory) {
     
-    let dirContent = (await readdir(
-        parentDirectoryToProcess + '/' + inputGalleryName,
-        {withFileTypes: true}))
-        .filter(dirent=>dirent.isFile())
-        .map(dirent=>dirent.name)
-        .filter(name =>isImage(name) || isVideo(name));
+    let dirContent = await getImagesAndVideoFiles(
+        parentDirectoryToProcess + '/' + inputGalleryName);
+    // numeric sort so that '2.jpg' appears before '10.jpg'
     dirContent.sort((a, b)=>a.localeCompare(b, 'en', {numeric: true}));
+    
     await indexFile.write(`${inputGalleryName} (${dirContent.length}) <br>`);
-    const PREVIEW_COUNT = 4;
-    let filesSelectedForPreview;
-    if(dirContent.length <= PREVIEW_COUNT) {
-        filesSelectedForPreview = dirContent;
-    } else {
-        // always take the first
-        filesSelectedForPreview = dirContent.slice(0, 1);
-        // then space out the remaining ones
-        for(let i = 0;i<PREVIEW_COUNT-1;i++) {
-            // take from the second image in the files to the last
-            let index_to_take = 
-                Math.floor((dirContent.length-1)/(PREVIEW_COUNT-1)*(i+1));
-            filesSelectedForPreview.push(dirContent[index_to_take]);
-        }
-    }
+    
+    let filesSelectedForPreview = selectPreviewFiles(dirContent);
 
     try {
         await mkdir(outputDirectory + '/' + inputGalleryName);
@@ -52,25 +86,17 @@ async function generateGalleryForDirectory(
     }
 
     for(var previewFilename of filesSelectedForPreview) {
-        let fullpreviewFilePath = 
+        let previewFilePath = 
             parentDirectoryToProcess +
             '/' + inputGalleryName +
             '/' + previewFilename;
-        let fullThumbnailDirectory = outputDirectory + '/' + inputGalleryName;
-        let thumbnailFilePathRelativeToOutputDirectory;
-        try {
-            thumbnailFilePathRelativeToOutputDirectory = 
-                await generateThumbnail(
-                    fullpreviewFilePath,
-                    fullThumbnailDirectory);
-        } catch (error) {
-            console.error(`Couldn't generate thumbnail for ${fullpreviewFilePath}.`, error.message);
-            // still generate the img in the page even if thumbnail generation
-            // failed (will display a broken image symbol in the browser).
-            thumbnailFilePathRelativeToOutputDirectory = '';
-        }
-            await indexFile.write(`<img src="${thumbnailFilePathRelativeToOutputDirectory}"></img>`)
-
+        let thumbnailDestinationDirectory = 
+            outputDirectory + '/' + inputGalleryName;
+        
+        await generatePreviewForOneFile(
+            indexFile,
+            previewFilePath,
+            thumbnailDestinationDirectory);
     }
     await indexFile.write('<br><br>');
 }
