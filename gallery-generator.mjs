@@ -29,7 +29,7 @@ function isVideo(filename) {
 }
 
 async function generateGalleryForDirectory(inputGalleryName, indexFile, outputDirectory) {
-    let dirContent = (await readdir(path + '/' + inputGalleryName, {withFileTypes: true}))
+    let dirContent = (await readdir(parentDirectoryToProcess + '/' + inputGalleryName, {withFileTypes: true}))
         .filter(dirent=>dirent.isFile())
         .map(dirent=>dirent.name)
         .filter(name =>isImage(name) || isVideo(name));
@@ -59,7 +59,7 @@ async function generateGalleryForDirectory(inputGalleryName, indexFile, outputDi
     }
 
     for(var previewFilename of filesSelectedForPreview) {
-        let fullpreviewFilePath = path + '/' + inputGalleryName + '/' + previewFilename;
+        let fullpreviewFilePath = parentDirectoryToProcess + '/' + inputGalleryName + '/' + previewFilename;
         // to be used for IO operations
         let fullthumbnailFilePath = outputDirectory + '/' + inputGalleryName + '/' + 'thumb_' + previewFilename + '.jpg';
         // to be used in HTML
@@ -78,28 +78,15 @@ async function generateGalleryForDirectory(inputGalleryName, indexFile, outputDi
     await indexFile.write('<br><br>');
 }
 
-async function getDirectories(path) {
-    let directories = (await readdir(path, {withFileTypes: true}))
-    .filter(dirent=>dirent.isDirectory())
-    .map(dirent=>dirent.name);
-    return directories;
-}
+
 
 if(process.argv.length < 3) {
     console.log("Missing arg : directory containing directories of media.");
     process.exit(1);
 }
-let path = process.argv.at(-1);
+let parentDirectoryToProcess = process.argv.at(-1);
 
-let directories;
-try{
-    directories = await getDirectories(path);
-}catch(err) {
-    console.error(`Couldn't read the directory (${path}). ${err}`);
-    process.exit(1);
-}
-
-const outputDirectory = path + '/' + OUTPUT_DIRECTORY_NAME;
+const outputDirectory = parentDirectoryToProcess + '/' + OUTPUT_DIRECTORY_NAME;
 try {
     await mkdir(outputDirectory)
 }catch(err) {
@@ -110,7 +97,7 @@ try {
 }
 console.log("Gallery preview generated in " + outputDirectory);
 
-// index
+// index will contain preview of all the directories
 let indexFile;
 try{
     let indexPath = outputDirectory + '/' + INDEX_FILE_NAME;
@@ -119,8 +106,22 @@ try{
     console.error(`Couldn't create the gallery preview web page at indexPath. ${err}`);
     process.exit(1);
 }
+await indexFile.write(`<h1>${parentDirectoryToProcess.split('/').at(-1)} Gallery</h1>\n`);
 
-await indexFile.write(`<h1>${path.split('/').at(-1)} Gallery</h1>\n`);
+async function getDirectories(path) {
+    let directories = (await readdir(path, {withFileTypes: true}))
+    .filter(dirent=>dirent.isDirectory())
+    .map(dirent=>dirent.name);
+    return directories;
+}
+
+let directories;
+try{
+    directories = await getDirectories(parentDirectoryToProcess);
+}catch(err) {
+    console.error(`Couldn't read the directory (${parentDirectoryToProcess}). ${err}`);
+    process.exit(1);
+}
 
 for(let inputGalleryName of directories) {
     if(inputGalleryName == OUTPUT_DIRECTORY_NAME) continue;
