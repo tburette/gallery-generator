@@ -1,9 +1,9 @@
 /*
 Generates the main index web page containing a preview of the subdirectories.
 */
-import {basename} from 'path';
+import {basename, relative, sep} from 'path';
 import {readdir, mkdir} from 'fs/promises';
-import {isImage, isVideo} from './utils.mjs';
+import {isImage, isVideo, pathToURLPath} from './utils.mjs';
 import {generateThumbnail} from './thumbnail.mjs';
 
 export {writeHeader, generateGalleryForDirectory, writeFooter};
@@ -42,11 +42,12 @@ function selectPreviewFiles(dirContent) {
 async function generatePreviewForOneFile(
     indexFile,
     previewFilePath,
+    outputDirectory,
     thumbnailDestinationDirectory) {
     
-    let thumbnailFilePathRelativeToOutputDirectory;
+    let thumbnailFilePath;
     try {
-        thumbnailFilePathRelativeToOutputDirectory = 
+        thumbnailFilePath = 
             await generateThumbnail(
                 previewFilePath,
                 thumbnailDestinationDirectory);
@@ -56,10 +57,12 @@ async function generatePreviewForOneFile(
             error.message);
         // still generate the img in the page even if thumbnail generation
         // failed (will display a broken image symbol in the browser).
-        thumbnailFilePathRelativeToOutputDirectory = '';
+        thumbnailFilePath = '';
     }
+        let thumbnailURLRelativeToOutputDirectory = 
+            pathToURLPath(relative(outputDirectory, thumbnailFilePath));
         await indexFile.write(
-            `<img src="${thumbnailFilePathRelativeToOutputDirectory}"></img>\n`);
+            `<img src="${thumbnailURLRelativeToOutputDirectory}"></img>\n`);
 }
 
 async function generateGalleryForDirectory(
@@ -69,7 +72,7 @@ async function generateGalleryForDirectory(
     outputDirectory) {
     
     let dirContent = await getImagesAndVideoFiles(
-        parentDirectoryToProcess + '/' + inputGalleryName);
+        parentDirectoryToProcess + sep + inputGalleryName);
     // numeric sort so that '2.jpg' appears before '10.jpg'
     dirContent.sort((a, b)=>a.localeCompare(b, 'en', {numeric: true}));
     
@@ -78,7 +81,7 @@ async function generateGalleryForDirectory(
     let filesSelectedForPreview = selectPreviewFiles(dirContent);
 
     try {
-        await mkdir(outputDirectory + '/' + inputGalleryName);
+        await mkdir(outputDirectory + sep + inputGalleryName);
     }catch(err) {
         if(err?.code != 'EEXIST') {
             throw err;
@@ -88,14 +91,15 @@ async function generateGalleryForDirectory(
     for(var previewFilename of filesSelectedForPreview) {
         let previewFilePath = 
             parentDirectoryToProcess +
-            '/' + inputGalleryName +
-            '/' + previewFilename;
+            sep + inputGalleryName +
+            sep + previewFilename;
         let thumbnailDestinationDirectory = 
-            outputDirectory + '/' + inputGalleryName;
+            outputDirectory + sep + inputGalleryName;
         
         await generatePreviewForOneFile(
             indexFile,
             previewFilePath,
+            outputDirectory,
             thumbnailDestinationDirectory);
     }
     await indexFile.write('<br><br>\n');

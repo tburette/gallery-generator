@@ -1,4 +1,4 @@
-import {basename} from 'path';
+import {basename, sep} from 'path';
 import {isImage, isVideo} from './utils.mjs';
 import util from 'util';
 const exec = util.promisify((await import('child_process')).exec);
@@ -14,7 +14,7 @@ async function generateThumbnail(inputFilePath, destinationDirectory) {
     // A bit ugly but simpler to handle.
     let thumbnailFilePath = 
         destinationDirectory + 
-        '/' + 
+        sep + 
         THUMBNAIL_FILE_PREFIX + 
         inputFileName + 
         THUMBNAIL_FILE_POSTFIX;

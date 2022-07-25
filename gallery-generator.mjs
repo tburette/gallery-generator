@@ -14,7 +14,7 @@ Tested on linux. May no work on windows due to difference in path separator
 */
 
 import {readdir, mkdir, open} from 'fs/promises';
-import {resolve} from 'path';
+import {resolve, sep} from 'path';
 import * as indexGenerator from './index-generator.mjs';
 
 const OUTPUT_DIRECTORY_NAME = "generatedGallery";
@@ -30,7 +30,7 @@ let parentDirectoryToProcess = process.argv.at(-1);
 // (wouldn't be the case with a path such as '.').
 parentDirectoryToProcess = resolve(parentDirectoryToProcess);
 
-const outputDirectory = parentDirectoryToProcess + '/' + OUTPUT_DIRECTORY_NAME;
+const outputDirectory = parentDirectoryToProcess + sep + OUTPUT_DIRECTORY_NAME;
 try {
     await mkdir(outputDirectory)
 }catch(err) {
@@ -44,7 +44,7 @@ console.log("Gallery preview generated in " + outputDirectory);
 // index will contain preview of all the directories
 let indexFile;
 try{
-    let indexPath = outputDirectory + '/' + INDEX_FILE_NAME;
+    let indexPath = outputDirectory + sep + INDEX_FILE_NAME;
     indexFile = await open(indexPath, 'w');
 }catch(err) {
     console.error(`Couldn't create the gallery preview web page at indexPath. ${err}`);
